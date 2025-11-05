@@ -1,350 +1,223 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Baker’s Calculator — sourdough.bake</title>
+<title>Pan Size Converter — sourdough.bake</title>
 <style>
   :root{
-    --bg:#f6efe6;
-    --card:#efe4d6;
-    --ink:#3e2d1f;
-    --muted:#7a6a59;
-    --accent:#b17c49;
-    --accent-ink:#fff;
-    --chip:#d9c8b5;
-    --chip-ink:#3e2d1f;
-    --radius:16px;
+    --bg:#F7F1E8; --card:#F1E8DC; --ink:#3E2B1F; --muted:#7A6657; --brand:#B68655;
+    --radius:14px;
   }
-  html,body{background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;margin:0}
-  .wrap{max-width:1040px;margin:28px auto;padding:0 18px}
-  h1{font-weight:800;letter-spacing:.3px;margin:0 0 8px}
-  .lead{color:var(--muted);margin:0 0 18px}
-  .topbar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:18px 0}
-  .tabs{display:flex;gap:8px;flex-wrap:wrap}
-  .tab{padding:10px 14px;background:var(--chip);color:var(--chip-ink);border-radius:999px;border:2px solid transparent;cursor:pointer;font-weight:600}
-  .tab[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
-  .units{display:flex;gap:6px;align-items:center}
-  .unit-btn{padding:8px 12px;border-radius:999px;border:none;cursor:pointer;background:var(--chip);color:var(--chip-ink);font-weight:700}
-  .unit-btn.active{background:var(--accent);color:var(--accent-ink)}
-  .card{background:var(--card);border-radius:var(--radius);padding:18px}
-  .grid2{display:grid;grid-template-columns:1fr;gap:18px}
-  @media(min-width:860px){.grid2{grid-template-columns:1fr 1fr}}
-  .panel h3{margin:0 0 10px;font-size:18px;letter-spacing:.2px}
-  label{display:block;font-weight:700;margin:14px 0 8px}
-  select,input{width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid #cdbca8;background:#fff;color:var(--ink);font-size:16px}
-  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .help{color:var(--muted);font-size:14px;margin-top:6px}
-  .actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:18px}
-  .btn{appearance:none;border:none;border-radius:12px;padding:14px 18px;font-weight:800;cursor:pointer}
-  .btn.primary{background:var(--accent);color:var(--accent-ink)}
-  .btn.ghost{background:#e6d8c7;color:var(--ink)}
-  .result{margin-top:18px;background:#fff;border:1px dashed #d4c6b5;border-radius:12px;padding:14px 16px;font-size:18px}
-  .result strong{font-weight:900}
-  footer{margin:26px 0 10px;color:var(--muted);font-size:14px;text-align:center}
-  .switcher{margin-top:10px}
-  .hidden{display:none}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font:500 16px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;}
+  .wrap{max-width:880px;margin:22px auto;padding:0 14px;}
+  h1{font:700 26px/1.2 ui-serif,Georgia,serif;margin:0 0 6px}
+  p.lead{margin:0 0 18px;color:var(--muted)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0 12px}
+  @media (max-width:760px){.row{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid #e8dfd4;border-radius:var(--radius);padding:14px}
+  .card h3{margin:0 0 8px;font-size:15px;letter-spacing:.02em;text-transform:uppercase}
+  label{display:block;font-size:13px;margin:10px 0 6px;color:var(--muted)}
+  select,input{width:100%;box-sizing:border-box;padding:10px 11px;border-radius:10px;border:1px solid #e0d6ca;background:#fff;color:var(--ink);font:500 15px/1.2 system-ui}
+  .inline{display:grid;grid-template-columns:1fr 140px;gap:10px}
+  .unit{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin:4px 0 8px}
+  .chip{border:1px solid #e0d6ca;border-radius:18px;padding:7px 10px;cursor:pointer;color:var(--muted)}
+  .chip.active{background:var(--brand);border-color:var(--brand);color:#fff}
+  .actions{display:grid;grid-template-columns:1fr 160px;gap:10px;margin-top:6px}
+  .btn{background:var(--brand);color:#fff;border:0;border-radius:12px;padding:12px 14px;font-weight:700;cursor:pointer}
+  .btn.secondary{background:#e8dfd4;color:var(--ink)}
+  .result{background:#ffffff;border:1px dashed #d8cab8;border-radius:var(--radius);padding:14px;margin-top:12px}
+  .k{color:#1a7f37;font-weight:800}
+  .small{color:var(--muted);font-size:13px}
+  footer{margin:18px 0 8px;color:var(--muted);font-size:12px;text-align:center}
 </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Baker’s Calculator</h1>
-    <p class="lead">Keep the same height & structure when you change pan size — or scale by portions. Works for cakes, pies, bars, casseroles, bread-in-pans, etc.</p>
+    <h1>Pan Size Converter</h1>
+    <p class="lead">Keep the same height & structure when you change pan size. Works for cakes, pies, bars, casseroles, etc.</p>
 
-    <div class="topbar">
-      <div class="tabs" role="tablist" aria-label="Calculator modes">
-        <button class="tab" role="tab" id="tab-pan" aria-selected="true" aria-controls="panel-pan">By Pan Size</button>
-        <button class="tab" role="tab" id="tab-portions" aria-selected="false" aria-controls="panel-portions">By Portions</button>
+    <div class="unit" aria-label="Units">
+      <span>Units:</span>
+      <button class="chip active" id="u-in">in</button>
+      <button class="chip" id="u-cm">cm</button>
+    </div>
+
+    <div class="row">
+      <div class="card">
+        <h3>In the recipe</h3>
+        <label>Shape</label>
+        <select id="src-shape">
+          <option value="round">Round</option>
+          <option value="square">Square</option>
+          <option value="rect">Rectangle</option>
+        </select>
+        <div id="src-fields"></div>
+        <label>Popular sizes</label>
+        <select id="src-preset"></select>
       </div>
-      <div class="units" aria-label="Units">
-        <span class="help" style="margin-right:6px;font-weight:700">Units:</span>
-        <button class="unit-btn active" data-unit="in">in</button>
-        <button class="unit-btn" data-unit="cm">cm</button>
+
+      <div class="card">
+        <h3>My pan</h3>
+        <label>Shape</label>
+        <select id="dst-shape">
+          <option value="round">Round</option>
+          <option value="square">Square</option>
+          <option value="rect">Rectangle</option>
+        </select>
+        <div id="dst-fields"></div>
+        <label>Popular sizes</label>
+        <select id="dst-preset"></select>
       </div>
     </div>
 
-    <!-- ===== PAN SIZE MODE ===== -->
-    <section id="panel-pan" class="card" role="tabpanel" aria-labelledby="tab-pan">
-      <div class="grid2">
-        <!-- In the recipe -->
-        <div class="panel">
-          <h3>In the recipe</h3>
-          <label for="r-shape">Shape</label>
-          <select id="r-shape">
-            <option value="circle">Round</option>
-            <option value="rect" selected>Rectangle</option>
-            <option value="square">Square</option>
-          </select>
+    <div class="actions">
+      <button class="btn" id="calc">Calculate</button>
+      <button class="btn secondary" id="clear">Reset</button>
+    </div>
 
-          <div id="r-sizes" class="row">
-            <div>
-              <label for="r-w">Width</label>
-              <input id="r-w" type="number" inputmode="decimal" placeholder="e.g. 13" />
-            </div>
-            <div>
-              <label for="r-h">Height</label>
-              <input id="r-h" type="number" inputmode="decimal" placeholder="e.g. 9" />
-            </div>
-          </div>
+    <div class="result" id="out" hidden>
+      <div><strong>Scale factor = <span class="k" id="k">1.00</span></strong></div>
+      <div>To keep the same height and structure as in the original recipe, multiply <strong>all ingredients</strong> by <strong id="k2">1.00</strong>.</div>
+      <div class="small" id="exact"></div>
+    </div>
 
-          <label for="r-pop">Popular sizes</label>
-          <select id="r-pop">
-            <option value="custom">Custom…</option>
-          </select>
-          <p class="help">Pick a popular pan or enter your own size. For round pans use the <b>diameter</b>.</p>
-        </div>
-
-        <!-- My pan -->
-        <div class="panel">
-          <h3>My pan</h3>
-          <label for="t-shape">Shape</label>
-          <select id="t-shape">
-            <option value="circle">Round</option>
-            <option value="rect" selected>Rectangle</option>
-            <option value="square">Square</option>
-          </select>
-
-          <div id="t-sizes" class="row">
-            <div>
-              <label for="t-w">Width</label>
-              <input id="t-w" type="number" inputmode="decimal" placeholder="e.g. 13" />
-            </div>
-            <div>
-              <label for="t-h">Height</label>
-              <input id="t-h" type="number" inputmode="decimal" placeholder="e.g. 9" />
-            </div>
-          </div>
-
-          <label for="t-pop">Popular sizes</label>
-          <select id="t-pop">
-            <option value="custom">Custom…</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="actions">
-        <button class="btn primary" id="calc-pan">Calculate</button>
-        <button class="btn ghost" id="reset-pan">Reset</button>
-      </div>
-      <div id="out-pan" class="result" aria-live="polite" hidden></div>
-    </section>
-
-    <!-- ===== PORTIONS MODE ===== -->
-    <section id="panel-portions" class="card hidden" role="tabpanel" aria-labelledby="tab-portions">
-      <div class="grid2">
-        <div class="panel">
-          <h3>In the recipe</h3>
-          <label for="r-kind">Type</label>
-          <select id="r-kind">
-            <option value="cupcakes">Cupcakes</option>
-            <option value="muffins">Muffins</option>
-            <option value="cookies">Cookies</option>
-            <option value="bars">Bars (pieces)</option>
-            <option value="donuts">Donuts</option>
-            <option value="other" selected>Portions</option>
-          </select>
-          <label for="r-q">Quantity</label>
-          <input id="r-q" type="number" inputmode="numeric" placeholder="e.g. 12" />
-          <p class="help">Number of pieces in the original recipe.</p>
-        </div>
-
-        <div class="panel">
-          <h3>What I need</h3>
-          <label for="t-kind">Type</label>
-          <select id="t-kind">
-            <option value="cupcakes">Cupcakes</option>
-            <option value="muffins">Muffins</option>
-            <option value="cookies">Cookies</option>
-            <option value="bars">Bars (pieces)</option>
-            <option value="donuts">Donuts</option>
-            <option value="other" selected>Portions</option>
-          </select>
-          <label for="t-q">Quantity</label>
-          <input id="t-q" type="number" inputmode="numeric" placeholder="e.g. 18" />
-          <p class="help">How many you want to make.</p>
-        </div>
-      </div>
-
-      <div class="actions">
-        <button class="btn primary" id="calc-portion">Calculate</button>
-        <button class="btn ghost" id="reset-portion">Reset</button>
-      </div>
-      <div id="out-portions" class="result" aria-live="polite" hidden></div>
-    </section>
-
-    <footer>© sourdough.bake • Baker’s calculator</footer>
+    <footer>© sourdough.bake • Pan converter</footer>
   </div>
 
 <script>
-(function(){
-  // ---- state
-  let UNIT = 'in'; // UI only (no conversion needed while both sides use the same unit)
+  const state = { unit:'in' };
+  const byId = id => document.getElementById(id);
 
-  // ---- tabs
-  const tabPan = document.getElementById('tab-pan');
-  const tabPortions = document.getElementById('tab-portions');
-  const panelPan = document.getElementById('panel-pan');
-  const panelPortions = document.getElementById('panel-portions');
-
-  function selectTab(which){
-    const isPan = which === 'pan';
-    tabPan.setAttribute('aria-selected', isPan ? 'true' : 'false');
-    tabPortions.setAttribute('aria-selected', !isPan ? 'true' : 'false');
-    panelPan.classList.toggle('hidden', !isPan);
-    panelPortions.classList.toggle('hidden', isPan);
-  }
-  tabPan.addEventListener('click', ()=>selectTab('pan'));
-  tabPortions.addEventListener('click', ()=>selectTab('portions'));
-
-  // ---- units
-  document.querySelectorAll('.unit-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      document.querySelectorAll('.unit-btn').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      UNIT = btn.dataset.unit; // kept for labels if needed later
-      updatePlaceholders();
-    });
-  });
-
-  function updatePlaceholders(){
-    const wH = UNIT==='in' ? 'e.g. 13' : 'e.g. 33';
-    const hH = UNIT==='in' ? 'e.g. 9'  : 'e.g. 23';
-    const dH = UNIT==='in' ? 'e.g. 9'  : 'e.g. 23';
-    // recipe
-    const rs = document.getElementById('r-shape').value;
-    document.querySelector('label[for="r-w"]').textContent = (rs==='circle') ? 'Diameter' : 'Width';
-    document.getElementById('r-w').placeholder = (rs==='circle') ? dH : wH;
-    // target
-    const ts = document.getElementById('t-shape').value;
-    document.querySelector('label[for="t-w"]').textContent = (ts==='circle') ? 'Diameter' : 'Width';
-    document.getElementById('t-w').placeholder = (ts==='circle') ? dH : wH;
-    document.getElementById('r-h').placeholder = hH;
-    document.getElementById('t-h').placeholder = hH;
-  }
-
-  // ---- popular sizes data
-  const POP = {
-    circle: [
-      {label:'6″', w:6},
-      {label:'7″', w:7},
-      {label:'8″', w:8},
-      {label:'9″', w:9},
-      {label:'10″', w:10},
-      {label:'11″', w:11},
-      {label:'12″', w:12},
-    ],
-    square: [
-      {label:'8″×8″', w:8, h:8},
-      {label:'9″×9″', w:9, h:9}
-    ],
-    rect: [
-      {label:'13″×9″', w:13, h:9},
-      {label:'11″×7″', w:11, h:7},
-      {label:'10″×6″', w:10, h:6}
-    ]
+  const presets = {
+    round: ['Custom…','6"','7"','8"','9"','10"','11"','12"'],
+    square:['Custom…','8×8"','9×9"','10×10"'],
+    rect:  ['Custom…','13×9"','11×7"','15×10"']
   };
 
-  // fill popular selects
-  function fillPopular(shapeSelId, popSelId, wId, hId){
-    const shape = document.getElementById(shapeSelId).value;
-    const pop = document.getElementById(popSelId);
-    pop.innerHTML = '<option value="custom">Custom…</option>';
-    POP[shape].forEach((p,i)=>{
-      const opt = document.createElement('option');
-      opt.value = i;
-      opt.textContent = p.label;
-      pop.appendChild(opt);
-    });
-    // diameter/width label
-    updatePlaceholders();
+  function inToCm(v){ return v*2.54 }
+  function cmToIn(v){ return v/2.54 }
+
+  const area = {
+    round: ({d}) => Math.PI * Math.pow(d/2,2),
+    square: ({a}) => a*a,
+    rect: ({w,h}) => w*h
+  };
+
+  function buildFields(side, shape){
+    const host = byId(side+'-fields');
+    host.innerHTML = '';
+    if(shape==='round'){
+      host.insertAdjacentHTML('beforeend', `<label>Diameter</label><input id="${side}-d" type="number" inputmode="decimal" placeholder="e.g. 8">`);
+    }else if(shape==='square'){
+      host.insertAdjacentHTML('beforeend', `<label>Side</label><input id="${side}-a" type="number" inputmode="decimal" placeholder="e.g. 8">`);
+    }else{
+      host.insertAdjacentHTML('beforeend', `<div class="inline"><div><label>Width</label><input id="${side}-w" type="number" inputmode="decimal" placeholder="e.g. 13"></div><div><label>Height</label><input id="${side}-h" type="number" inputmode="decimal" placeholder="e.g. 9"></div></div>`);
+    }
+    buildPreset(side, shape);
   }
 
-  // init
-  fillPopular('r-shape','r-pop','r-w','r-h');
-  fillPopular('t-shape','t-pop','t-w','t-h');
-
-  document.getElementById('r-shape').addEventListener('change', ()=>fillPopular('r-shape','r-pop','r-w','r-h'));
-  document.getElementById('t-shape').addEventListener('change', ()=>fillPopular('t-shape','t-pop','t-w','t-h'));
-
-  // on popular change → autofill fields
-  function connectPopular(popSelId, shapeSelId, wId, hId){
-    const popSel = document.getElementById(popSelId);
-    popSel.addEventListener('change', ()=>{
-      const shape = document.getElementById(shapeSelId).value;
-      if(popSel.value==='custom') return;
-      const item = POP[shape][Number(popSel.value)];
-      const w = document.getElementById(wId);
-      const h = document.getElementById(hId);
-      if(shape==='circle'){
-        w.value = item.w; // diameter
-        h.value = '';
-      } else {
-        w.value = item.w;
-        h.value = item.h;
+  function buildPreset(side, shape){
+    const sel = byId(side+'-preset');
+    const list = presets[shape].map((t,i)=>{
+      if(i===0) return `<option>Custom…</option>`;
+      if(state.unit==='cm' && t!=='Custom…'){
+        let text = t.replace(/([\d.]+)(?:×([\d.]+))?/,(m,a,b)=>{
+          if(b){return `${(inToCm(a)).toFixed(1)}×${(inToCm(b)).toFixed(1)} cm`;}
+          return `${(inToCm(a)).toFixed(1)} cm`;
+        });
+        return `<option>${text}</option>`;
       }
-    });
-  }
-  connectPopular('r-pop','r-shape','r-w','r-h');
-  connectPopular('t-pop','t-shape','t-w','t-h');
-
-  // helpers
-  const val = id => Number((document.getElementById(id).value || '').trim());
-  const area = (shape,w,h)=> shape==='circle' ? Math.PI*Math.pow(w/2,2) : (shape==='square' ? w*w : w*h);
-
-  function showResult(el, k){
-    const exact = (Math.round(k*1000)/1000).toFixed(3);
-    const rounded = (Math.round(k*100)/100).toFixed(2);
-    el.innerHTML =
-      `<strong>Scale factor = ${rounded}</strong><br/>`+
-      `To keep the same height and structure, multiply all ingredients by <strong>${rounded}</strong> <span class="help">(exact: ${exact})</span>.`;
-    el.hidden = false;
+      return `<option>${t}</option>`;
+    }).join('');
+    sel.innerHTML = list;
+    sel.onchange = () => applyPreset(side, shape, sel.value);
   }
 
-  // Calculate by pan
-  document.getElementById('calc-pan').addEventListener('click', ()=>{
-    const rs = document.getElementById('r-shape').value;
-    const ts = document.getElementById('t-shape').value;
-
-    const rw = val('r-w'), rh = val('r-h');
-    const tw = val('t-w'), th = val('t-h');
-
-    if(!rw || (rs!=='circle' && !rh) || !tw || (ts!=='circle' && !th)){
-      const out = document.getElementById('out-pan');
-      out.innerHTML = 'Please fill in pan sizes on both sides.';
-      out.hidden = false; return;
+  function applyPreset(side, shape, val){
+    if(val.includes('Custom')) return;
+    if(state.unit==='cm' && val.includes('cm')){
+      const nums = val.match(/([\d.]+)/g).map(Number);
+      if(shape==='round') byId(side+'-d').value = nums[0];
+      else if(shape==='square') byId(side+'-a').value = nums[0];
+      else{byId(side+'-w').value = nums[0]; byId(side+'-h').value = nums[1];}
+      return;
     }
-    const A1 = area(rs, rw, rh || rw);
-    const A2 = area(ts, tw, th || tw);
-    const k  = A2 / A1;
-    showResult(document.getElementById('out-pan'), k);
-  });
-
-  document.getElementById('reset-pan').addEventListener('click', ()=>{
-    ['r-w','r-h','t-w','t-h'].forEach(id=>document.getElementById(id).value='');
-    ['r-pop','t-pop'].forEach(id=>document.getElementById(id).value='custom');
-    document.getElementById('out-pan').hidden = true;
-  });
-
-  // Portions
-  document.getElementById('calc-portion').addEventListener('click', ()=>{
-    const rq = val('r-q');
-    const tq = val('t-q');
-    if(!rq || !tq){ 
-      const out = document.getElementById('out-portions');
-      out.innerHTML = 'Enter quantities for both fields.';
-      out.hidden = false; return;
+    if(shape==='round'){
+      const d = parseFloat(val.replace(/[^0-9.]/g,''));
+      byId(side+'-d').value = state.unit==='in'? d : inToCm(d).toFixed(1);
+    }else if(shape==='square'){
+      const a = parseFloat(val.replace(/[^0-9.]/g,''));
+      byId(side+'-a').value = state.unit==='in'? a : inToCm(a).toFixed(1);
+    }else{
+      const m = val.match(/([\d.]+)×([\d.]+)/);
+      if(!m) return;
+      const w = parseFloat(m[1]), h = parseFloat(m[2]);
+      if(state.unit==='cm'){
+        byId(side+'-w').value = inToCm(w).toFixed(1);
+        byId(side+'-h').value = inToCm(h).toFixed(1);
+      }else{
+        byId(side+'-w').value = w;
+        byId(side+'-h').value = h;
+      }
     }
-    const k = tq / rq;
-    showResult(document.getElementById('out-portions'), k);
-  });
-  document.getElementById('reset-portion').addEventListener('click', ()=>{
-    ['r-q','t-q'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('out-portions').hidden = true;
-  });
+  }
 
-  // first placeholders
-  updatePlaceholders();
-})();
+  function readDims(side, shape){
+    const isCm = state.unit==='cm';
+    if(shape==='round'){
+      let d = parseFloat(byId(side+'-d').value||'0');
+      if(isNaN(d)||d<=0) return null;
+      if(isCm) d = cmToIn(d);
+      return {d};
+    }else if(shape==='square'){
+      let a = parseFloat(byId(side+'-a').value||'0');
+      if(isNaN(a)||a<=0) return null;
+      if(isCm) a = cmToIn(a);
+      return {a};
+    }else{
+      let w = parseFloat(byId(side+'-w').value||'0');
+      let h = parseFloat(byId(side+'-h').value||'0');
+      if([w,h].some(v=>isNaN(v)||v<=0)) return null;
+      if(isCm){ w = cmToIn(w); h = cmToIn(h); }
+      return {w,h};
+    }
+  }
+
+  function calculate(){
+    const sShape = byId('src-shape').value;
+    const dShape = byId('dst-shape').value;
+    const sDims = readDims('src', sShape);
+    const dDims = readDims('dst', dShape);
+    if(!sDims || !dDims){ alert('Please enter valid sizes for both pans.'); return; }
+    const k = area[dShape](dDims)/area[sShape](sDims);
+    const r = Math.round(k*100)/100;
+    byId('k').textContent = r.toFixed(2);
+    byId('k2').textContent = r.toFixed(2);
+    byId('exact').textContent = `Exact: ${k.toFixed(3)}`;
+    byId('out').hidden = false;
+  }
+
+  function setUnit(u){
+    state.unit = u;
+    byId('u-in').classList.toggle('active', u==='in');
+    byId('u-cm').classList.toggle('active', u==='cm');
+    // пересоздаём списки в текущих единицах
+    buildPreset('src', byId('src-shape').value);
+    buildPreset('dst', byId('dst-shape').value);
+  }
+
+  function init(){
+    buildFields('src', 'round');
+    buildFields('dst', 'round');
+    byId('src-shape').onchange = e => buildFields('src', e.target.value);
+    byId('dst-shape').onchange = e => buildFields('dst', e.target.value);
+    byId('calc').onclick = calculate;
+    byId('clear').onclick = ()=>{document.querySelectorAll('input').forEach(i=>i.value='');byId('out').hidden=true;};
+    byId('u-in').onclick = ()=> setUnit('in');
+    byId('u-cm').onclick = ()=> setUnit('cm');
+  }
+  init();
 </script>
 </body>
 </html>
