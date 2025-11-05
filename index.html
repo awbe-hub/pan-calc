@@ -3,219 +3,320 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Pan Size Converter — sourdough.bake</title>
+<title>Pan & Servings Converter — sourdough.bake</title>
 <style>
   :root{
     --bg:#F7F1E8; --card:#F1E8DC; --ink:#3E2B1F; --muted:#7A6657; --brand:#B68655;
     --radius:14px;
   }
-  html,body{margin:0;background:var(--bg);color:var(--ink);font:500 16px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;}
-  .wrap{max-width:880px;margin:22px auto;padding:0 14px;}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font:500 16px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+  .wrap{max-width:900px;margin:22px auto;padding:0 14px}
   h1{font:700 26px/1.2 ui-serif,Georgia,serif;margin:0 0 6px}
   p.lead{margin:0 0 18px;color:var(--muted)}
+  .tabs{display:flex;gap:8px;margin:10px 0 12px}
+  .tab{border:1px solid #e0d6ca;background:#efe5d8;border-radius:999px;padding:8px 14px;cursor:pointer;color:var(--muted);font-weight:600}
+  .tab.active{background:var(--brand);border-color:var(--brand);color:#fff}
+  .unit{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin:6px 0 10px}
+  .chip{border:1px solid #e0d6ca;border-radius:18px;padding:7px 10px;cursor:pointer;color:var(--muted)}
+  .chip.active{background:var(--brand);border-color:var(--brand);color:#fff}
+
   .row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0 12px}
   @media (max-width:760px){.row{grid-template-columns:1fr}}
   .card{background:var(--card);border:1px solid #e8dfd4;border-radius:var(--radius);padding:14px}
   .card h3{margin:0 0 8px;font-size:15px;letter-spacing:.02em;text-transform:uppercase}
   label{display:block;font-size:13px;margin:10px 0 6px;color:var(--muted)}
   select,input{width:100%;box-sizing:border-box;padding:10px 11px;border-radius:10px;border:1px solid #e0d6ca;background:#fff;color:var(--ink);font:500 15px/1.2 system-ui}
-  .inline{display:grid;grid-template-columns:1fr 140px;gap:10px}
-  .unit{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin:4px 0 8px}
-  .chip{border:1px solid #e0d6ca;border-radius:18px;padding:7px 10px;cursor:pointer;color:var(--muted)}
-  .chip.active{background:var(--brand);border-color:var(--brand);color:#fff}
+  .inline{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .inline-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .lock{display:flex;align-items:center;gap:8px;margin-top:6px;color:var(--muted);font-size:13px;user-select:none;cursor:pointer}
   .actions{display:grid;grid-template-columns:1fr 160px;gap:10px;margin-top:6px}
   .btn{background:var(--brand);color:#fff;border:0;border-radius:12px;padding:12px 14px;font-weight:700;cursor:pointer}
   .btn.secondary{background:#e8dfd4;color:var(--ink)}
-  .result{background:#ffffff;border:1px dashed #d8cab8;border-radius:var(--radius);padding:14px;margin-top:12px}
+  .result{background:#fff;border:1px dashed #d8cab8;border-radius:var(--radius);padding:14px;margin-top:12px}
   .k{color:#1a7f37;font-weight:800}
   .small{color:var(--muted);font-size:13px}
   footer{margin:18px 0 8px;color:var(--muted);font-size:12px;text-align:center}
+  .hidden{display:none}
 </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Pan Size Converter</h1>
-    <p class="lead">Keep the same height & structure when you change pan size. Works for cakes, pies, bars, casseroles, etc.</p>
+    <h1>Pan & Servings Converter</h1>
+    <p class="lead">Keep the same height & structure when you change pan size — or scale by cupcakes/servings.</p>
 
-    <div class="unit" aria-label="Units">
-      <span>Units:</span>
-      <button class="chip active" id="u-in">in</button>
-      <button class="chip" id="u-cm">cm</button>
+    <div class="tabs">
+      <button class="tab active" id="tab-pan">By pan</button>
+      <button class="tab" id="tab-serv">Servings / cupcakes</button>
     </div>
 
-    <div class="row">
-      <div class="card">
-        <h3>In the recipe</h3>
-        <label>Shape</label>
-        <select id="src-shape">
-          <option value="round">Round</option>
-          <option value="square">Square</option>
-          <option value="rect">Rectangle</option>
-        </select>
-        <div id="src-fields"></div>
-        <label>Popular sizes</label>
-        <select id="src-preset"></select>
+    <div id="panel-pan">
+      <div class="unit" aria-label="Units">
+        <span>Units:</span>
+        <button class="chip active" id="u-in">in</button>
+        <button class="chip" id="u-cm">cm</button>
       </div>
 
-      <div class="card">
-        <h3>My pan</h3>
-        <label>Shape</label>
-        <select id="dst-shape">
-          <option value="round">Round</option>
-          <option value="square">Square</option>
-          <option value="rect">Rectangle</option>
-        </select>
-        <div id="dst-fields"></div>
-        <label>Popular sizes</label>
-        <select id="dst-preset"></select>
+      <div class="row">
+        <div class="card">
+          <h3>In the recipe</h3>
+          <label>Shape</label>
+          <select id="src-shape">
+            <option value="round">Round</option>
+            <option value="square">Square</option>
+            <option value="rect">Rectangle</option>
+          </select>
+          <div id="src-fields"></div>
+          <label>Popular sizes</label>
+          <select id="src-preset"></select>
+        </div>
+
+        <div class="card">
+          <h3>My pan</h3>
+          <label>Shape</label>
+          <select id="dst-shape">
+            <option value="round">Round</option>
+            <option value="square">Square</option>
+            <option value="rect">Rectangle</option>
+          </select>
+          <div id="dst-fields"></div>
+          <label>Popular sizes</label>
+          <select id="dst-preset"></select>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="calc">Calculate</button>
+        <button class="btn secondary" id="clear-pan">Reset</button>
+      </div>
+
+      <div class="result" id="out-pan" hidden>
+        <div><strong>Scale factor = <span class="k" id="k-pan">1.00</span></strong></div>
+        <div>To keep the same height and structure as in the original recipe, multiply <strong>all ingredients</strong> by <strong id="k2-pan">1.00</strong>.</div>
+        <div class="small" id="exact-pan"></div>
       </div>
     </div>
 
-    <div class="actions">
-      <button class="btn" id="calc">Calculate</button>
-      <button class="btn secondary" id="clear">Reset</button>
+    <div id="panel-serv" class="hidden">
+      <div class="card">
+        <h3>Servings / Cupcakes</h3>
+        <div class="inline-3">
+          <div>
+            <label>Original yield</label>
+            <input id="serv-from" type="number" inputmode="numeric" placeholder="e.g. 12">
+          </div>
+          <div>
+            <label>Target yield</label>
+            <input id="serv-to" type="number" inputmode="numeric" placeholder="e.g. 18">
+          </div>
+          <div>
+            <label>Preset</label>
+            <select id="serv-preset">
+              <option value="">Custom…</option>
+              <option value="6">6 cupcakes</option>
+              <option value="12">12 cupcakes</option>
+              <option value="18">18 cupcakes</option>
+              <option value="24">24 cupcakes</option>
+              <option value="30">30 mini cupcakes</option>
+            </select>
+          </div>
+        </div>
+        <div class="actions" style="grid-template-columns:1fr 1fr;">
+          <button class="btn" id="calc-serv">Calculate</button>
+          <button class="btn secondary" id="clear-serv">Reset</button>
+        </div>
+        <div class="result" id="out-serv" hidden>
+          <div><strong>Scale factor = <span class="k" id="k-serv">1.00</span></strong></div>
+          <div>Multiply all ingredients by <strong id="k2-serv">1.00</strong> to get the desired number of servings.</div>
+        </div>
+      </div>
     </div>
 
-    <div class="result" id="out" hidden>
-      <div><strong>Scale factor = <span class="k" id="k">1.00</span></strong></div>
-      <div>To keep the same height and structure as in the original recipe, multiply <strong>all ingredients</strong> by <strong id="k2">1.00</strong>.</div>
-      <div class="small" id="exact"></div>
-    </div>
-
-    <footer>© sourdough.bake • Pan converter</footer>
+    <footer>© sourdough.bake • Pan & Servings converter</footer>
   </div>
 
 <script>
+  // ---------- helpers ----------
+  const $ = id => document.getElementById(id);
   const state = { unit:'in' };
-  const byId = id => document.getElementById(id);
 
-  const presets = {
+  function inToCm(v){ return v*2.54 }
+  function cmToIn(v){ return v/2.54 }
+
+  // preset maps (inches base)
+  const presetsIn = {
     round: ['Custom…','6"','7"','8"','9"','10"','11"','12"'],
     square:['Custom…','8×8"','9×9"','10×10"'],
     rect:  ['Custom…','13×9"','11×7"','15×10"']
   };
 
-  function inToCm(v){ return v*2.54 }
-  function cmToIn(v){ return v/2.54 }
+  function presetsFor(shape, unit){
+    if(unit==='in') return presetsIn[shape];
+    // convert to cm text
+    return presetsIn[shape].map((t,i)=>{
+      if(i===0) return 'Custom…';
+      return t.replace(/([\d.]+)(?:×([\d.]+))?/,(m,a,b)=>{
+        if(b){return `${(inToCm(+a)).toFixed(1)}×${(inToCm(+b)).toFixed(1)} cm`;}
+        return `${(inToCm(+a)).toFixed(1)} cm`;
+      });
+    });
+  }
 
+  // areas in inches
   const area = {
     round: ({d}) => Math.PI * Math.pow(d/2,2),
-    square: ({a}) => a*a,
-    rect: ({w,h}) => w*h
+    square: ({a,b}) => a*b,
+    rect:   ({w,h}) => w*h
   };
 
+  // ---------- UI build ----------
+  function buildSquareFields(side){
+    const host = $(side+'-fields');
+    host.innerHTML = `
+      <div class="inline">
+        <div>
+          <label>Side A</label>
+          <input id="${side}-a" type="number" inputmode="decimal" placeholder="e.g. 9">
+        </div>
+        <div>
+          <label>Side B</label>
+          <input id="${side}-b" type="number" inputmode="decimal" placeholder="e.g. 9">
+        </div>
+      </div>
+      <label class="lock"><input id="${side}-lock" type="checkbox" checked /> Link sides (square)</label>
+    `;
+    // link behavior
+    const a = $(side+'-a'), b = $(side+'-b'), lock = $(side+'-lock');
+    a.addEventListener('input', ()=>{ if(lock.checked) b.value = a.value; });
+    b.addEventListener('input', ()=>{ if(lock.checked) a.value = b.value; });
+  }
+
   function buildFields(side, shape){
-    const host = byId(side+'-fields');
+    const host = $(side+'-fields');
     host.innerHTML = '';
     if(shape==='round'){
       host.insertAdjacentHTML('beforeend', `<label>Diameter</label><input id="${side}-d" type="number" inputmode="decimal" placeholder="e.g. 8">`);
     }else if(shape==='square'){
-      host.insertAdjacentHTML('beforeend', `<label>Side</label><input id="${side}-a" type="number" inputmode="decimal" placeholder="e.g. 8">`);
+      buildSquareFields(side);
     }else{
-      host.insertAdjacentHTML('beforeend', `<div class="inline"><div><label>Width</label><input id="${side}-w" type="number" inputmode="decimal" placeholder="e.g. 13"></div><div><label>Height</label><input id="${side}-h" type="number" inputmode="decimal" placeholder="e.g. 9"></div></div>`);
+      host.insertAdjacentHTML('beforeend', `
+        <div class="inline">
+          <div><label>Width</label><input id="${side}-w" type="number" inputmode="decimal" placeholder="e.g. 13"></div>
+          <div><label>Height</label><input id="${side}-h" type="number" inputmode="decimal" placeholder="e.g. 9"></div>
+        </div>`);
     }
     buildPreset(side, shape);
   }
 
   function buildPreset(side, shape){
-    const sel = byId(side+'-preset');
-    const list = presets[shape].map((t,i)=>{
-      if(i===0) return `<option>Custom…</option>`;
-      if(state.unit==='cm' && t!=='Custom…'){
-        let text = t.replace(/([\d.]+)(?:×([\d.]+))?/,(m,a,b)=>{
-          if(b){return `${(inToCm(a)).toFixed(1)}×${(inToCm(b)).toFixed(1)} cm`;}
-          return `${(inToCm(a)).toFixed(1)} cm`;
-        });
-        return `<option>${text}</option>`;
-      }
-      return `<option>${t}</option>`;
-    }).join('');
-    sel.innerHTML = list;
+    const sel = $(side+'-preset');
+    sel.innerHTML = presetsFor(shape, state.unit).map(v=>`<option>${v}</option>`).join('');
     sel.onchange = () => applyPreset(side, shape, sel.value);
   }
 
   function applyPreset(side, shape, val){
     if(val.includes('Custom')) return;
-    if(state.unit==='cm' && val.includes('cm')){
-      const nums = val.match(/([\d.]+)/g).map(Number);
-      if(shape==='round') byId(side+'-d').value = nums[0];
-      else if(shape==='square') byId(side+'-a').value = nums[0];
-      else{byId(side+'-w').value = nums[0]; byId(side+'-h').value = nums[1];}
-      return;
-    }
+    const isCm = state.unit==='cm';
+    const nums = val.match(/([\d.]+)/g).map(Number);
     if(shape==='round'){
-      const d = parseFloat(val.replace(/[^0-9.]/g,''));
-      byId(side+'-d').value = state.unit==='in'? d : inToCm(d).toFixed(1);
+      const d = isCm ? nums[0] : (isCm?inToCm(nums[0]):nums[0]);
+      $(side+'-d').value = isCm ? nums[0] : nums[0];
     }else if(shape==='square'){
-      const a = parseFloat(val.replace(/[^0-9.]/g,''));
-      byId(side+'-a').value = state.unit==='in'? a : inToCm(a).toFixed(1);
+      let x = nums[0], y = nums[1] ?? nums[0];
+      if(isCm===false){ /* inches already */ }
+      $(side+'-a').value = isCm ? x : x;
+      $(side+'-b').value = isCm ? y : y;
+      $(side+'-lock').checked = (x===y);
     }else{
-      const m = val.match(/([\d.]+)×([\d.]+)/);
-      if(!m) return;
-      const w = parseFloat(m[1]), h = parseFloat(m[2]);
-      if(state.unit==='cm'){
-        byId(side+'-w').value = inToCm(w).toFixed(1);
-        byId(side+'-h').value = inToCm(h).toFixed(1);
-      }else{
-        byId(side+'-w').value = w;
-        byId(side+'-h').value = h;
-      }
+      let w = nums[0], h = nums[1];
+      $(side+'-w').value = w;
+      $(side+'-h').value = h;
     }
   }
 
   function readDims(side, shape){
     const isCm = state.unit==='cm';
+    const toIn = v => isCm ? cmToIn(parseFloat(v||'0')) : parseFloat(v||'0');
     if(shape==='round'){
-      let d = parseFloat(byId(side+'-d').value||'0');
-      if(isNaN(d)||d<=0) return null;
-      if(isCm) d = cmToIn(d);
+      const d = toIn($(side+'-d').value);
+      if(!d || d<=0) return null;
       return {d};
     }else if(shape==='square'){
-      let a = parseFloat(byId(side+'-a').value||'0');
-      if(isNaN(a)||a<=0) return null;
-      if(isCm) a = cmToIn(a);
-      return {a};
+      let a = toIn($(side+'-a').value);
+      let b = toIn($(side+'-b').value);
+      if(!a || !b) return null;
+      return {a,b};
     }else{
-      let w = parseFloat(byId(side+'-w').value||'0');
-      let h = parseFloat(byId(side+'-h').value||'0');
-      if([w,h].some(v=>isNaN(v)||v<=0)) return null;
-      if(isCm){ w = cmToIn(w); h = cmToIn(h); }
+      let w = toIn($(side+'-w').value);
+      let h = toIn($(side+'-h').value);
+      if(!w || !h) return null;
       return {w,h};
     }
   }
 
-  function calculate(){
-    const sShape = byId('src-shape').value;
-    const dShape = byId('dst-shape').value;
+  function calculatePan(){
+    const sShape = $('src-shape').value;
+    const dShape = $('dst-shape').value;
     const sDims = readDims('src', sShape);
     const dDims = readDims('dst', dShape);
     if(!sDims || !dDims){ alert('Please enter valid sizes for both pans.'); return; }
     const k = area[dShape](dDims)/area[sShape](sDims);
     const r = Math.round(k*100)/100;
-    byId('k').textContent = r.toFixed(2);
-    byId('k2').textContent = r.toFixed(2);
-    byId('exact').textContent = `Exact: ${k.toFixed(3)}`;
-    byId('out').hidden = false;
+    $('k-pan').textContent = r.toFixed(2);
+    $('k2-pan').textContent = r.toFixed(2);
+    $('exact-pan').textContent = `Exact: ${k.toFixed(3)}`;
+    $('out-pan').hidden = false;
   }
 
   function setUnit(u){
     state.unit = u;
-    byId('u-in').classList.toggle('active', u==='in');
-    byId('u-cm').classList.toggle('active', u==='cm');
-    // пересоздаём списки в текущих единицах
-    buildPreset('src', byId('src-shape').value);
-    buildPreset('dst', byId('dst-shape').value);
+    $('u-in').classList.toggle('active', u==='in');
+    $('u-cm').classList.toggle('active', u==='cm');
+    buildPreset('src', $('src-shape').value);
+    buildPreset('dst', $('dst-shape').value);
   }
 
+  // servings
+  $('serv-preset').addEventListener('change', e=>{
+    const v = e.target.value;
+    if(v) $('serv-to').value = v;
+  });
+  function calculateServ(){
+    const a = parseFloat($('serv-from').value||'0');
+    const b = parseFloat($('serv-to').value||'0');
+    if(!(a>0 && b>0)){ alert('Enter both original and target yields.'); return; }
+    const k = b/a;
+    const r = Math.round(k*100)/100;
+    $('k-serv').textContent = r.toFixed(2);
+    $('k2-serv').textContent = r.toFixed(2);
+    $('out-serv').hidden = false;
+  }
+
+  // tabs
+  function showTab(which){
+    const pan = $('panel-pan'), serv = $('panel-serv');
+    const t1 = $('tab-pan'), t2 = $('tab-serv');
+    if(which==='pan'){ pan.classList.remove('hidden'); serv.classList.add('hidden'); t1.classList.add('active'); t2.classList.remove('active'); }
+    else{ serv.classList.remove('hidden'); pan.classList.add('hidden'); t2.classList.add('active'); t1.classList.remove('active'); }
+  }
+
+  // init
   function init(){
-    buildFields('src', 'round');
-    buildFields('dst', 'round');
-    byId('src-shape').onchange = e => buildFields('src', e.target.value);
-    byId('dst-shape').onchange = e => buildFields('dst', e.target.value);
-    byId('calc').onclick = calculate;
-    byId('clear').onclick = ()=>{document.querySelectorAll('input').forEach(i=>i.value='');byId('out').hidden=true;};
-    byId('u-in').onclick = ()=> setUnit('in');
-    byId('u-cm').onclick = ()=> setUnit('cm');
+    buildFields('src','round');
+    buildFields('dst','round');
+    $('src-shape').onchange = e => buildFields('src', e.target.value);
+    $('dst-shape').onchange = e => buildFields('dst', e.target.value);
+
+    $('u-in').onclick = ()=> setUnit('in');
+    $('u-cm').onclick = ()=> setUnit('cm');
+
+    $('calc').onclick = calculatePan;
+    $('clear-pan').onclick = ()=>{document.querySelectorAll('#panel-pan input').forEach(i=>i.value='');$('out-pan').hidden=true;}
+
+    $('calc-serv').onclick = calculateServ;
+    $('clear-serv').onclick = ()=>{$('serv-from').value='';$('serv-to').value='';$('serv-preset').value='';$('out-serv').hidden=true;}
+
+    $('tab-pan').onclick = ()=> showTab('pan');
+    $('tab-serv').onclick = ()=> showTab('serv');
   }
   init();
 </script>
