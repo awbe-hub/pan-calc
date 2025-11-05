@@ -1,329 +1,233 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pan & Servings Converter — sourdough.bake</title>
 <style>
-  :root{
+  :root {
     --bg:#f2e9df; --panel:#efe4d7; --ink:#2b1e12; --muted:#6e5948;
-    --accent:#b07a4a; --accent-ink:#fff;
-    --radius:14px;
+    --accent:#b07a4a; --accent-ink:#fff; --radius:14px;
   }
-  html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 "Inter",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.45 "Inter",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
   .wrap{max-width:1080px;margin:auto;padding:28px}
-  h1{font-weight:800;letter-spacing:.3px;margin:0 0 8px;}
+  h1{font-weight:800;margin:0 0 8px}
   .lead{color:var(--muted);margin:0 0 22px}
   .tabs{display:flex;gap:8px;margin:8px 0 18px}
-  .tab{border:0;background:#e7d8c8;color:var(--ink);padding:10px 16px;border-radius:999px;cursor:pointer}
+  .tab{border:0;background:#e7d8c8;color:var(--ink);
+    padding:10px 16px;border-radius:999px;cursor:pointer}
   .tab.active{background:var(--accent);color:var(--accent-ink)}
+  .unit-switch{display:flex;align-items:center;gap:8px;justify-content:flex-end;margin-bottom:10px}
+  .pill{padding:6px 10px;border-radius:999px;background:#e7d8c8;cursor:pointer}
+  .pill.active{background:var(--accent);color:var(--accent-ink)}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:18px}
   .card{background:var(--panel);border-radius:var(--radius);padding:18px}
   .card h3{margin:4px 0 14px}
   label{display:block;font-size:13px;color:var(--muted);margin:10px 0 6px}
-  select, input{width:100%;box-sizing:border-box;border:1px solid #dbcbb9;background:#fff;color:var(--ink);
-    border-radius:10px;padding:12px 12px;font:inherit}
+  select,input{width:100%;box-sizing:border-box;border:1px solid #dbcbb9;
+    background:#fff;color:var(--ink);border-radius:10px;padding:12px;font:inherit}
   .split{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .actions{display:flex;gap:12px;margin-top:16px}
-  .btn{border:0;background:var(--accent);color:var(--accent-ink);padding:14px 18px;border-radius:12px;cursor:pointer;font-weight:700}
+  .btn{border:0;background:var(--accent);color:var(--accent-ink);
+    padding:14px 18px;border-radius:12px;cursor:pointer;font-weight:700}
   .btn.ghost{background:#e7d8c8;color:var(--ink)}
-  .unit-switch{display:flex;align-items:center;gap:8px;justify-content:flex-end;margin-bottom:10px}
-  .pill{padding:6px 10px;border-radius:999px;background:#e7d8c8;cursor:pointer}
-  .pill.active{background:var(--accent);color:var(--accent-ink)}
-  .result{margin-top:14px;background:#fff;border:1px dashed #cbb8a5;border-radius:12px;padding:14px}
+  .result{margin-top:14px;background:#fff;border:1px dashed #cbb8a5;
+    border-radius:12px;padding:14px}
   .muted{color:var(--muted);font-size:13px}
   .footer{margin-top:24px;color:var(--muted);font-size:13px;text-align:center}
-  @media (max-width:900px){.row{grid-template-columns:1fr}}
+  @media(max-width:900px){.row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>Pan & Servings Converter</h1>
-    <p class="lead">Keep the same height &amp; structure when you change pan size — or scale by cupcakes/servings.</p>
+<div class="wrap">
+  <h1>Pan & Servings Converter</h1>
+  <p class="lead">Keep the same height &amp; structure when you change pan size — or scale by servings.</p>
 
-    <div class="tabs">
-      <button class="tab active" id="tab-pan">By pan</button>
-      <button class="tab" id="tab-serv">Servings / cupcakes</button>
-    </div>
-
-    <!-- UNITS -->
-    <div class="unit-switch" id="unitBar">
-      <span class="muted">Units:</span>
-      <span class="pill active" data-unit="in" id="u-in">in</span>
-      <span class="pill" data-unit="cm" id="u-cm">cm</span>
-    </div>
-
-    <!-- BY PAN -->
-    <section id="pane-pan">
-      <div class="row">
-        <!-- SOURCE -->
-        <div class="card">
-          <h3>In the recipe</h3>
-
-          <label>Shape</label>
-          <select id="src-shape">
-            <option value="round">Round</option>
-            <option value="rect">Rectangle / Square</option>
-          </select>
-
-          <!-- Round -->
-          <div class="round-only" id="src-round">
-            <label>Diameter</label>
-            <input id="src-d" type="number" inputmode="decimal" placeholder="e.g. 9" />
-          </div>
-
-          <!-- Rectangle / Square -->
-          <div class="rect-only" id="src-rect" style="display:none">
-            <div class="split">
-              <div>
-                <label>Width</label>
-                <input id="src-w" type="number" inputmode="decimal" placeholder="e.g. 23" />
-              </div>
-              <div>
-                <label>Height</label>
-                <input id="src-h" type="number" inputmode="decimal" placeholder="e.g. 33" />
-              </div>
-            </div>
-          </div>
-
-          <label>Popular sizes</label>
-          <select id="src-preset"></select>
-        </div>
-
-        <!-- DEST -->
-        <div class="card">
-          <h3>My pan</h3>
-
-          <label>Shape</label>
-          <select id="dst-shape">
-            <option value="round">Round</option>
-            <option value="rect">Rectangle / Square</option>
-          </select>
-
-          <div class="round-only" id="dst-round">
-            <label>Diameter</label>
-            <input id="dst-d" type="number" inputmode="decimal" placeholder="e.g. 8" />
-          </div>
-
-          <div class="rect-only" id="dst-rect" style="display:none">
-            <div class="split">
-              <div>
-                <label>Width</label>
-                <input id="dst-w" type="number" inputmode="decimal" placeholder="e.g. 20" />
-              </div>
-              <div>
-                <label>Height</label>
-                <input id="dst-h" type="number" inputmode="decimal" placeholder="e.g. 30" />
-              </div>
-            </div>
-          </div>
-
-          <label>Popular sizes</label>
-          <select id="dst-preset"></select>
-        </div>
-      </div>
-
-      <div class="actions">
-        <button class="btn" id="calc">Calculate</button>
-        <button class="btn ghost" id="reset">Reset</button>
-      </div>
-      <div class="result" id="res" hidden></div>
-    </section>
-
-    <!-- BY SERVINGS -->
-    <section id="pane-serv" hidden>
-      <div class="card">
-        <h3>Servings / cupcakes</h3>
-        <div class="split">
-          <div>
-            <label>Servings in the recipe</label>
-            <input id="s-from" type="number" inputmode="numeric" placeholder="e.g. 12" />
-          </div>
-          <div>
-            <label>I need</label>
-            <input id="s-to" type="number" inputmode="numeric" placeholder="e.g. 18" />
-          </div>
-        </div>
-        <div class="actions">
-          <button class="btn" id="calcS">Calculate</button>
-          <button class="btn ghost" id="resetS">Reset</button>
-        </div>
-        <div class="result" id="resS" hidden></div>
-        <p class="muted" style="margin-top:8px">Tip: For cupcakes, the factor works well if sizes are similar (mini → mini, standard → standard).</p>
-      </div>
-    </section>
-
-    <div class="footer">© sourdough.bake • Pan & Servings converter</div>
+  <div class="tabs">
+    <button class="tab active" id="tab-pan">By pan</button>
+    <button class="tab" id="tab-serv">Servings</button>
   </div>
 
+  <div class="unit-switch" id="unitBar">
+    <span class="muted">Units:</span>
+    <span class="pill active" data-unit="in" id="u-in">in</span>
+    <span class="pill" data-unit="cm" id="u-cm">cm</span>
+  </div>
+
+  <!-- BY PAN -->
+  <section id="pane-pan">
+    <div class="row">
+      <div class="card">
+        <h3>In the recipe</h3>
+        <label>Shape</label>
+        <select id="src-shape">
+          <option value="round">Round</option>
+          <option value="rect">Rectangle / Square</option>
+        </select>
+        <div id="src-round">
+          <label>Diameter</label>
+          <input id="src-d" type="number" placeholder="e.g. 9">
+        </div>
+        <div id="src-rect" style="display:none">
+          <div class="split">
+            <div><label>Width</label><input id="src-w" type="number" placeholder="e.g. 23"></div>
+            <div><label>Height</label><input id="src-h" type="number" placeholder="e.g. 33"></div>
+          </div>
+        </div>
+        <label>Popular sizes</label>
+        <select id="src-preset"></select>
+      </div>
+
+      <div class="card">
+        <h3>My pan</h3>
+        <label>Shape</label>
+        <select id="dst-shape">
+          <option value="round">Round</option>
+          <option value="rect">Rectangle / Square</option>
+        </select>
+        <div id="dst-round">
+          <label>Diameter</label>
+          <input id="dst-d" type="number" placeholder="e.g. 8">
+        </div>
+        <div id="dst-rect" style="display:none">
+          <div class="split">
+            <div><label>Width</label><input id="dst-w" type="number" placeholder="e.g. 20"></div>
+            <div><label>Height</label><input id="dst-h" type="number" placeholder="e.g. 30"></div>
+          </div>
+        </div>
+        <label>Popular sizes</label>
+        <select id="dst-preset"></select>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="calc">Calculate</button>
+      <button class="btn ghost" id="reset">Reset</button>
+    </div>
+    <div class="result" id="res" hidden></div>
+  </section>
+
+  <!-- SERVINGS -->
+  <section id="pane-serv" hidden>
+    <div class="card">
+      <h3>Servings</h3>
+      <div class="split">
+        <div>
+          <label>Original yield</label>
+          <input id="s-from" type="number" placeholder="e.g. 12">
+        </div>
+        <div>
+          <label>Target yield</label>
+          <input id="s-to" type="number" placeholder="e.g. 24">
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="calcS">Calculate</button>
+        <button class="btn ghost" id="resetS">Reset</button>
+      </div>
+      <div class="result" id="resS" hidden></div>
+      <p class="muted" style="margin-top:8px">
+        Works for any individual bakes: cupcakes, muffins, cookies, brownies, bars, etc.
+      </p>
+    </div>
+  </section>
+
+  <div class="footer">© sourdough.bake • Pan & Servings converter</div>
+</div>
+
 <script>
-/* ---------- PRESETS ---------- */
-// US (inches)
-const presetsIn = {
-  round: ['Custom…','6"','7"','8"','9"','10"','11"','12"'],
-  rect:  ['Custom…','7×11"','8×12"','9×13"','10×15"','8×8"','9×9"','10×10"']
+const presetsIn={
+  round:['Custom…','6"','7"','8"','9"','10"','11"','12"'],
+  rect:['Custom…','7×11"','8×12"','9×13"','10×15"','8×8"','9×9"','10×10"']
 };
-// EU/INT (centimeters) — реальные магазинные размеры
-const presetsCm = {
-  round: ['Custom…','16 cm','18 cm','20 cm','22 cm','24 cm','26 cm','28 cm'],
-  rect:  ['Custom…','18×28 cm','20×30 cm','23×33 cm','25×35 cm','18×18 cm','20×20 cm','22×22 cm','24×24 cm','26×26 cm']
+const presetsCm={
+  round:['Custom…','16 cm','18 cm','20 cm','22 cm','24 cm','26 cm','28 cm'],
+  rect:['Custom…','18×28 cm','20×30 cm','23×33 cm','25×35 cm','18×18 cm','20×20 cm','22×22 cm','24×24 cm','26×26 cm']
 };
+const $=s=>document.querySelector(s);const state={unit:'in'};
 
-const $ = sel => document.querySelector(sel);
-const state = { unit:'in' };
-
-/* ---------- UI HELPERS ---------- */
 function switchPane(which){
-  const pan = (which==='pan');
-  $('#pane-pan').hidden = !pan;
-  $('#pane-serv').hidden = pan;
-  $('#tab-pan').classList.toggle('active', pan);
-  $('#tab-serv').classList.toggle('active', !pan);
-  $('#unitBar').style.display = pan ? 'flex' : 'none';
+  const pan=which==='pan';
+  $('#pane-pan').hidden=!pan;$('#pane-serv').hidden=pan;
+  $('#tab-pan').classList.toggle('active',pan);
+  $('#tab-serv').classList.toggle('active',!pan);
+  $('#unitBar').style.display=pan?'flex':'none';
 }
-
-function buildPresets(side, shape){
-  const list = (state.unit==='cm' ? presetsCm : presetsIn)[shape];
-  const sel = $(`#${side}-preset`);
-  sel.innerHTML = list.map(v=>`<option>${v}</option>`).join('');
+function buildPresets(side,shape){
+  const list=(state.unit==='cm'?presetsCm:presetsIn)[shape];
+  const sel=$(`#${side}-preset`);
+  sel.innerHTML=list.map(v=>`<option>${v}</option>`).join('');
 }
-
 function updateShapeBlocks(side){
-  const shape = $(`#${side}-shape`).value;
-  $(`#${side}-round`).style.display = (shape==='round') ? '' : 'none';
-  $(`#${side}-rect`).style.display  = (shape==='rect')  ? '' : 'none';
-  buildPresets(side, shape);
+  const shape=$(`#${side}-shape`).value;
+  $(`#${side}-round`).style.display=(shape==='round')?'':'none';
+  $(`#${side}-rect`).style.display=(shape==='rect')?'':'none';
+  buildPresets(side,shape);
 }
-
 function setUnit(u){
-  state.unit = u;
-  $('#u-in').classList.toggle('active', u==='in');
-  $('#u-cm').classList.toggle('active', u==='cm');
-  updateShapeBlocks('src');
-  updateShapeBlocks('dst');
-  updatePlaceholders();
+  state.unit=u;
+  $('#u-in').classList.toggle('active',u==='in');
+  $('#u-cm').classList.toggle('active',u==='cm');
+  updateShapeBlocks('src');updateShapeBlocks('dst');updatePlaceholders();
 }
-
 function updatePlaceholders(){
-  const ex = (state.unit==='cm') ? 'e.g. 22' : 'e.g. 9';
+  const ex=(state.unit==='cm')?'e.g. 22':'e.g. 9';
   ['src','dst'].forEach(s=>{
-    const d=$(`#${s}-d`); if(d) d.placeholder=ex;
+    const d=$(`#${s}-d`);if(d)d.placeholder=ex;
     ['w','h'].forEach(k=>{
-      const el=$(`#${s}-${k}`); if(el) el.placeholder = (state.unit==='cm'?'e.g. 23':'e.g. 9');
+      const el=$(`#${s}-${k}`);if(el)el.placeholder=(state.unit==='cm'?'e.g. 23':'e.g. 9');
     });
   });
 }
-
-/* ---------- APPLY PRESET ---------- */
-function applyPreset(side, val){
-  if(val.startsWith('Custom')) return;
-  const nums = val.match(/([\d.]+)/g)?.map(Number) ?? [];
-  const shape = $(`#${side}-shape`).value;
-
-  if(shape==='round'){
-    $(`#${side}-d`).value = nums[0] ?? '';
-  }else{
-    // Rectangle/Square — два числа
-    $(`#${side}-w`).value = nums[0] ?? '';
-    $(`#${side}-h`).value = nums[1] ?? '';
-  }
+function applyPreset(side,val){
+  if(val.startsWith('Custom'))return;
+  const nums=val.match(/([\d.]+)/g)?.map(Number)??[];
+  const shape=$(`#${side}-shape`).value;
+  if(shape==='round'){$(`#${side}-d`).value=nums[0]??'';}
+  else{$(`#${side}-w`).value=nums[0]??'';$(`#${side}-h`).value=nums[1]??'';}
 }
-
-/* ---------- MATH ---------- */
-const toCm = x => x * 2.54;
-const toIn = x => x / 2.54;
-
+const toCm=x=>x*2.54,toIn=x=>x/2.54;
 function readDims(side){
-  const shape = $(`#${side}-shape`).value;
+  const shape=$(`#${side}-shape`).value;
   if(shape==='round'){
-    let d = parseFloat($(`#${side}-d`).value);
-    if (!isFinite(d)) return null;
-    if(state.unit==='cm') d = toIn(d); // работаем в дюймах внутри
-    return {shape, dIn:d};
+    let d=parseFloat($(`#${side}-d`).value);if(!isFinite(d))return null;
+    if(state.unit==='cm')d=toIn(d);return{shape,dIn:d};
   }else{
-    let w = parseFloat($(`#${side}-w`).value);
-    let h = parseFloat($(`#${side}-h`).value);
-    if (!isFinite(w) || !isFinite(h)) return null;
-    if(state.unit==='cm'){ w = toIn(w); h = toIn(h); }
-    return {shape, wIn:w, hIn:h};
+    let w=parseFloat($(`#${side}-w`).value),h=parseFloat($(`#${side}-h`).value);
+    if(!isFinite(w)||!isFinite(h))return null;
+    if(state.unit==='cm'){w=toIn(w);h=toIn(h);}return{shape,wIn:w,hIn:h};
   }
 }
-
-function area(info){
-  if(info.shape==='round'){
-    const r = info.dIn/2;
-    return Math.PI * r * r;
-  }else{
-    return info.wIn * info.hIn;
-  }
-}
-
-function fmtFactor(f){
-  const rounded = Math.round(f*100)/100;  // 2 знака для карточки
-  const exact   = Math.round(f*1000)/1000; // точное рядом
-  return {rounded, exact};
-}
-
-/* ---------- ACTIONS ---------- */
+function area(info){return info.shape==='round'?Math.PI*Math.pow(info.dIn/2,2):info.wIn*info.hIn;}
+function fmt(f){return{r:Math.round(f*100)/100,e:Math.round(f*1000)/1000};}
 function calcByPan(){
-  const A = readDims('src');
-  const B = readDims('dst');
-  const box = $('#res');
-  if(!A || !B){ box.hidden=false; box.innerHTML = `<b>Please fill all fields.</b><br><span class="muted">Tip: use “Popular sizes”.</span>`; return; }
-
-  const f = area(B)/area(A);
-  const {rounded, exact} = fmtFactor(f);
+  const A=readDims('src'),B=readDims('dst'),box=$('#res');
+  if(!A||!B){box.hidden=false;box.innerHTML='<b>Please fill all fields.</b>';return;}
+  const f=area(B)/area(A),{r,e}=fmt(f);
   box.hidden=false;
-  box.innerHTML =
-    `<b>Scale factor = ${rounded}</b><br>`+
-    `To keep the same height & structure as in the original recipe, multiply all ingredients by <b>${rounded}</b> `+
-    `<span class="muted">(exact: ${exact})</span>.`;
+  box.innerHTML=`<b>Scale factor = ${r}</b><br>To keep the same height & structure, multiply all ingredients by <b>${r}</b> <span class="muted">(exact: ${e})</span>.`;
 }
-
 function resetPan(){
-  ['src-d','dst-d','src-w','src-h','dst-w','dst-h'].forEach(id=>{ const el=$( '#'+id ); if(el) el.value=''; });
-  $('#src-preset').selectedIndex = 0;
-  $('#dst-preset').selectedIndex = 0;
-  $('#res').hidden = true;
+  ['src-d','dst-d','src-w','src-h','dst-w','dst-h'].forEach(id=>{const el=$('#'+id);if(el)el.value='';});
+  $('#src-preset').selectedIndex=0;$('#dst-preset').selectedIndex=0;$('#res').hidden=true;
 }
-
 function calcServ(){
-  const from = parseFloat($('#s-from').value);
-  const to   = parseFloat($('#s-to').value);
-  const box  = $('#resS');
-  if(!isFinite(from) || !isFinite(to) || from<=0){ box.hidden=false; box.innerHTML='<b>Please enter valid numbers.</b>'; return; }
-  const f = to/from;
-  const {rounded, exact} = fmtFactor(f);
-  box.hidden=false;
-  box.innerHTML =
-    `<b>Scale factor = ${rounded}</b><br>`+
-    `Multiply all ingredients by <b>${rounded}</b> to get ${to} servings `+
-    `<span class="muted">(exact: ${exact})</span>.`;
+  const from=parseFloat($('#s-from').value),to=parseFloat($('#s-to').value),box=$('#resS');
+  if(!isFinite(from)||!isFinite(to)||from<=0){box.hidden=false;box.innerHTML='<b>Please enter valid numbers.</b>';return;}
+  const f=to/from,{r,e}=fmt(f);box.hidden=false;
+  box.innerHTML=`<b>Scale factor = ${r}</b><br>Multiply all ingredients by <b>${r}</b> <span class="muted">(exact: ${e})</span>.`;
 }
-
-function resetServ(){ $('#s-from').value=''; $('#s-to').value=''; $('#resS').hidden=true; }
-
-/* ---------- BINDINGS ---------- */
-$('#tab-pan').addEventListener('click', ()=>switchPane('pan'));
-$('#tab-serv').addEventListener('click', ()=>switchPane('serv'));
-
-$('#u-in').addEventListener('click', ()=>setUnit('in'));
-$('#u-cm').addEventListener('click', ()=>setUnit('cm'));
-
-['src','dst'].forEach(side=>{
-  $(`#${side}-shape`).addEventListener('change', ()=>updateShapeBlocks(side));
-  $(`#${side}-preset`).addEventListener('change', e=>applyPreset(side, e.target.value));
+function resetServ(){$('#s-from').value='';$('#s-to').value='';$('#resS').hidden=true;}
+$('#tab-pan').onclick=()=>switchPane('pan');$('#tab-serv').onclick=()=>switchPane('serv');
+$('#u-in').onclick=()=>setUnit('in');$('#u-cm').onclick=()=>setUnit('cm');
+['src','dst'].forEach(s=>{
+  $(`#${s}-shape`).onchange=()=>updateShapeBlocks(s);
+  $(`#${s}-preset`).onchange=e=>applyPreset(s,e.target.value);
 });
-
-$('#calc').addEventListener('click', calcByPan);
-$('#reset').addEventListener('click', resetPan);
-$('#calcS').addEventListener('click', calcServ);
-$('#resetS').addEventListener('click', resetServ);
-
-/* ---------- INIT ---------- */
-updateShapeBlocks('src');
-updateShapeBlocks('dst');
-updatePlaceholders();
+$('#calc').onclick=calcByPan;$('#reset').onclick=resetPan;
+$('#calcS').onclick=calcServ;$('#resetS').onclick=resetServ;
+updateShapeBlocks('src');updateShapeBlocks('dst');updatePlaceholders();
 </script>
 </body>
 </html>
