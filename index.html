@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Калькулятор формы — sourdough.bake</title>
+<style>
+  :root{
+    --bg:#f7f3ee; --paper:#fffdf8; --ink:#5b4632; --accent:#b48652;
+    --muted:#8f7964; --ring:#d8c6b2;
+  }
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:16px/1.45 "Inter",system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+  .wrap{max-width:920px;margin:40px auto;padding:24px; background:var(--paper);
+        border:1px solid var(--ring); border-radius:16px; box-shadow:0 6px 20px rgba(60,36,19,.06);}
+  h1{font-weight:700; font-size:26px; margin:0 0 16px}
+  .sub{color:var(--muted); margin-bottom:20px}
+  .tabs{display:flex; gap:8px; margin:12px 0 16px}
+  .tabbtn{border:1px solid var(--ring); background:#fff; color:var(--ink); padding:10px 14px; border-radius:12px; cursor:pointer}
+  .tabbtn.active{background:var(--accent); color:#fff; border-color:var(--accent)}
+  .grid{display:grid; grid-template-columns:repeat(12,1fr); gap:12px}
+  .card{grid-column:span 6; border:1px dashed var(--ring); border-radius:12px; padding:14px}
+  .card h3{margin:0 0 10px; font-size:15px; text-transform:uppercase; letter-spacing:.04em}
+  label{display:block; font-size:13px; margin:8px 0 4px; color:var(--muted)}
+  input,select,button{width:100%; box-sizing:border-box; padding:10px 12px; border-radius:10px; border:1px solid var(--ring); background:#fff; color:var(--ink)}
+  .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .hint{font-size:12px; color:var(--muted)}
+  .sizes{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px}
+  .chip{border:1px solid var(--ring); background:#fff; padding:6px 10px; border-radius:999px; font-size:12px; cursor:pointer}
+  .actions{display:flex; gap:10px; margin:16px 0}
+  .primary{background:var(--accent); color:#fff; border-color:var(--accent)}
+  .result{border:1px solid var(--ring); background:#fff; border-radius:12px; padding:16px; margin:8px 0 6px}
+  .coef{font-weight:800; font-size:20px; color:#137333}
+  .note{font-size:13px; color:var(--muted)}
+  .foot{margin-top:18px; font-size:12px; color:var(--muted)}
+  @media (max-width:900px){
+    .card{grid-column:span 12}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Калькулятор пересчёта формы</h1>
+    <div class="sub">Сохраняем ту же высоту и структуру изделия. Подходит для тортов, пирогов, пирожных, запеканок и т.п.</div>
+
+    <div class="tabs">
+      <button class="tabbtn active" data-tab="pan">По форме</button>
+      <button class="tabbtn" data-tab="serv">Капкейки / порции</button>
+      <div style="margin-left:auto; display:flex; gap:8px; align-items:center">
+        <label class="hint" for="unit">Единицы</label>
+        <select id="unit">
+          <option value="cm">сантиметры</option>
+          <option value="in">дюймы</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- TAB: PAN -->
+    <div id="tab-pan">
+      <div class="grid">
+        <div class="card">
+          <h3>В рецепте</h3>
+          <label>Форма</label>
+          <select id="src-shape">
+            <option value="round">круглая</option>
+            <option value="square">квадратная</option>
+            <option value="rect">прямоугольная</option>
+          </select>
+
+          <div id="src-round" class="row">
+            <div>
+              <label>Диаметр</label>
+              <input id="src-d" type="number" inputmode="decimal" placeholder="например 20">
+            </div>
+          </div>
+
+          <div id="src-rect" class="row" style="display:none">
+            <div>
+              <label>Ширина</label>
+              <input id="src-w" type="number" inputmode="decimal" placeholder="например 20">
+            </div>
+            <div>
+              <label>Длина</label>
+              <input id="src-h" type="number" inputmode="decimal" placeholder="например 30">
+            </div>
+          </div>
+
+          <div class="hint">Быстрый выбор (дюймы):</div>
+          <div class="sizes" id="src-sizes"></div>
+        </div>
+
+        <div class="card">
+          <h3>Моя форма</h3>
+          <label>Форма</label>
+          <select id="dst-shape">
+            <option value="round">круглая</option>
+            <option value="square">квадратная</option>
+            <option value="rect">прямоугольная</option>
+          </select>
+
+          <div id="dst-round" class="row">
+            <div>
+              <label>Диаметр</label>
+              <input id="dst-d" type="number" inputmode="decimal" placeholder="например 24">
+            </div>
+          </div>
+
+          <div id="dst-rect" class="row" style="display:none">
+            <div>
+              <label>Ширина</label>
+              <input id="dst-w" type="number" inputmode="decimal" placeholder="например 23">
+            </div>
+            <div>
+              <label>Длина</label>
+              <input id="dst-h" type="number" inputmode="decimal" placeholder="например 33">
+            </div>
+          </div>
+
+          <div class="hint">Популярные размеры (дюймы):</div>
+          <div class="sizes" id="dst-sizes"></div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="primary" id="calc-pan">Рассчитать</button>
+        <button id="clear-pan">Очистить</button>
+      </div>
+
+      <div id="out-pan" class="result" style="display:none"></div>
+      <div id="out-aux" class="note" style="display:none"></div>
+    </div>
+
+    <!-- TAB: SERV -->
+    <div id="tab-serv" style="display:none">
+      <div class="grid">
+        <div class="card">
+          <h3>Капкейки / порции</h3>
+          <div class="row">
+            <div>
+              <label>В рецепте (шт.)</label>
+              <input id="src-serv" type="number" inputmode="numeric" placeholder="например 12">
+            </div>
+            <div>
+              <label>Мне нужно (шт.)</label>
+              <input id="dst-serv" type="number" inputmode="numeric" placeholder="например 18">
+            </div>
+          </div>
+          <div class="hint" style="margin-top:6px">Работает и для порций печенья, маффинов, панкейков и т.д.</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="primary" id="calc-serv">Рассчитать</button>
+        <button id="clear-serv">Очистить</button>
+      </div>
+
+      <div id="out-serv" class="result" style="display:none"></div>
+      <div class="note">Если коэффициент больше 1 — увеличиваем тесто, если меньше 1 — уменьшаем.</div>
+    </div>
+
+    <div class="foot">© sourdough.bake • Калькулятор сохраняет высоту изделия и масштабирует массу/объём ингредиентов по площади формы.</div>
+  </div>
+
+<script>
+  // helpers
+  const $ = sel => document.querySelector(sel);
+  const show = (el, on=true)=> el.style.display = on ? '' : 'none';
+  const toCm = (val, unit) => {
+    const x = parseFloat(val || '0');
+    return unit==='in' ? x * 2.54 : x;
+  };
+
+  // tabs
+  document.querySelectorAll('.tabbtn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      show($('#tab-pan'), btn.dataset.tab==='pan');
+      show($('#tab-serv'), btn.dataset.tab==='serv');
+    });
+  });
+
+  // shape toggles
+  function refreshShape(which){
+    const shape = $(`#${which}-shape`).value;
+    show($(`#${which}-round`), shape==='round');
+    show($(`#${which}-rect`), shape!=='round');
+  }
+  ['src','dst'].forEach(w=>{
+    $(`#${w}-shape`).addEventListener('change', ()=>refreshShape(w));
+    refreshShape(w);
+  });
+
+  // quick chips (popular inches)
+  const inchSizes = ['6"','7"','8"','9"','10"','11"','12"','13"x9"','9"x9"','8"x8"'];
+  function makeChips(containerId, target){
+    const c = $(`#${containerId}`);
+    c.innerHTML='';
+    inchSizes.forEach(s=>{
+      const chip = document.createElement('button');
+      chip.type='button'; chip.className='chip'; chip.textContent=s;
+      chip.addEventListener('click', ()=>{
+        if(s.includes('x')){ // rect
+          const [a,b]=s.replace(/"/g,'').split('x').map(Number);
+          $(`#${target}-shape`).value = (a===b)?'square':'rect'; refreshShape(target);
+          $(`#${target}-w`).value = a; $(`#${target}-h`).value = b;
+          $('#unit').value='in';
+        }else{ // round
+          const d = Number(s.replace(/"/g,''));
+          $(`#${target}-shape`).value='round'; refreshShape(target);
+          $(`#${target}-d`).value=d;
+          $('#unit').value='in';
+        }
+      });
+      c.appendChild(chip);
+    });
+  }
+  makeChips('src-sizes','src');
+  makeChips('dst-sizes','dst');
+
+  // area calc
+  function area(shape, d=null,w=null,h=null,unit='cm'){
+    if(shape==='round'){
+      const D = toCm(d,unit);
+      const r = D/2;
+      return Math.PI*r*r;
+    }else{
+      const W = toCm(w,unit);
+      const H = toCm(h,unit);
+      return W*H;
+    }
+  }
+
+  // PAN calculate
+  $('#calc-pan').addEventListener('click', ()=>{
+    const unit = $('#unit').value;
+
+    const sShape = $('#src-shape').value;
+    let sA=0;
+    if(sShape==='round'){
+      sA = area('round',$('#src-d').value,null,null,unit);
+    }else{
+      sA = area('rect',null,$('#src-w').value,$('#src-h').value,unit);
+    }
+
+    const dShape = $('#dst-shape').value;
+    let dA=0;
+    if(dShape==='round'){
+      dA = area('round',$('#dst-d').value,null,null,unit);
+    }else{
+      dA = area('rect',null,$('#dst-w').value,$('#dst-h').value,unit);
+    }
+
+    if(!sA || !dA || sA<=0 || dA<=0){
+      alert('Пожалуйста, заполните размеры обеих форм.');
+      return;
+    }
+
+    const k = dA / sA;
+    const k2 = Math.round(k*100)/100;
+    const k3 = Math.round(k*1000)/1000;
+
+    const text = `
+      <div class="coef">Коэффициент = ${k2}</div>
+      <div>Чтобы ваше изделие сохранило ту же высоту и структуру, как в исходном рецепте,
+      умножьте все ингредиенты на <b>${k2}</b> <span class="note">(точно: ${k3})</span>.</div>
+    `;
+    $('#out-pan').innerHTML = text;
+    show($('#out-pan'), true);
+
+    $('#out-aux').textContent = 'Если коэффициент больше 1 — теста понадобится больше; если меньше 1 — уменьшите ингредиенты в том же соотношении.';
+    show($('#out-aux'), true);
+  });
+
+  $('#clear-pan').addEventListener('click', ()=>{
+    ['src-d','src-w','src-h','dst-d','dst-w','dst-h'].forEach(id=>{ const el=$('#'+id); if(el) el.value=''; });
+    show($('#out-pan'),false); show($('#out-aux'),false);
+  });
+
+  // SERV calculate
+  $('#calc-serv').addEventListener('click', ()=>{
+    const from = parseFloat($('#src-serv').value || '0');
+    const to   = parseFloat($('#dst-serv').value || '0');
+    if(from<=0 || to<=0){ alert('Введите количества “в рецепте” и “мне нужно”.'); return; }
+    const k = to / from;
+    const k2 = Math.round(k*100)/100;
+    const k3 = Math.round(k*1000)/1000;
+    $('#out-serv').innerHTML =
+      `<div class="coef">Коэффициент = ${k2}</div>
+       <div>Чтобы получить нужное количество, умножьте все ингредиенты на <b>${k2}</b> <span class="note">(точно: ${k3})</span>.</div>`;
+    show($('#out-serv'), true);
+  });
+
+  $('#clear-serv').addEventListener('click', ()=>{
+    $('#src-serv').value=''; $('#dst-serv').value='';
+    show($('#out-serv'), false);
+  });
+</script>
+</body>
+</html>
